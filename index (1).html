@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cancionero</title>
+<style>
+:root{--bg:#1c1c1e;--card:#2a2a2d;--tx:#eee;--mu:#9a9aa0;--ac:#ffb020;--ch:#ffb020;--bd:#3a3a3e;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+[data-theme=claro]{--bg:#f6f6f3;--card:#fff;--tx:#1b1b1b;--mu:#6b6b70;--ac:#0a6cff;--ch:#c2410c;--bd:#ddd}
+[data-theme=sepia]{--bg:#f1e6cf;--card:#f8f0de;--tx:#3b2f20;--mu:#8a7658;--ac:#9a4a14;--ch:#a32a1a;--bd:#dcc9a3}
+[data-theme=noche]{--bg:#0d1526;--card:#16213a;--tx:#e4ecff;--mu:#8ea0c8;--ac:#5aa9ff;--ch:#7fd0ff;--bd:#27385c}
+[data-theme=bosque]{--bg:#10201a;--card:#183027;--tx:#e3f3ea;--mu:#8fb5a2;--ac:#4ade80;--ch:#a3e635;--bd:#25483a}
+[data-theme=rosa]{--bg:#2a1220;--card:#3b1a2e;--tx:#ffe8f3;--mu:#c997b2;--ac:#ff5fa2;--ch:#ffa6cf;--bd:#5a2a45}
+[data-theme=contraste]{--bg:#000;--card:#000;--tx:#fff;--mu:#ddd;--ac:#ffff00;--ch:#00ffff;--bd:#fff}
+*{box-sizing:border-box}html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--tx);font:16px/1.4 system-ui,sans-serif;display:flex;flex-direction:column}
+header{display:flex;gap:8px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--bd);flex-wrap:wrap}
+header h1{font-size:18px;margin:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+main{flex:1;overflow:auto;padding:12px;max-width:900px;width:100%;margin:0 auto}
+nav{display:flex;border-top:1px solid var(--bd)}
+nav button{flex:1;padding:12px;background:none;border:0;color:var(--mu);font-size:14px}
+nav button.on{color:var(--ac);font-weight:700}
+button,select,input,textarea{font:inherit;color:var(--tx)}
+.b{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:7px 12px;cursor:pointer}
+.b.p{background:var(--ac);color:var(--bg);border-color:var(--ac);font-weight:700}
+.b.d{color:#f55}
+input,textarea,select{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:8px;width:100%}
+textarea{font-family:ui-monospace,monospace;min-height:340px;font-size:14px}
+.item{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:10px 12px;margin:8px 0;display:flex;align-items:center;gap:10px;cursor:pointer}
+.item .t{flex:1;min-width:0}.item small{color:var(--mu)}
+.key{background:var(--ac);color:var(--bg);border-radius:6px;padding:2px 8px;font-weight:700;font-size:13px}
+.bar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:8px 0}
+.song{font-family:ui-monospace,Menlo,monospace;font-size:var(--fs,17px)}
+.ln{margin:.35em 0;white-space:pre-wrap}
+.seg{display:inline-flex;flex-direction:column;vertical-align:bottom}
+.ch{color:var(--ch);font-weight:700;min-height:1.2em;padding-right:.5ch}
+.sec{color:var(--ac);font-weight:700;margin-top:1.1em;text-transform:uppercase;font-size:.85em}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sw{display:flex;gap:8px;flex-wrap:wrap}
+.sw button{width:70px;height:44px;border-radius:8px;border:2px solid var(--bd);font-size:11px;cursor:pointer}
+.sw button.on{border-color:var(--ac);outline:2px solid var(--ac)}
+label{display:block;color:var(--mu);font-size:13px;margin:10px 0 4px}
+.mu{color:var(--mu)}
+.chip{display:inline-block;background:var(--ac);color:var(--bg);border-radius:14px;padding:4px 11px;font-weight:700;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+.chip.pl{background:var(--ch);padding:0 6px;border-radius:5px;font-size:.85em;margin-right:2px}
+.chip.sel{outline:3px solid var(--tx)}.chip:active{cursor:grabbing}
+.ghost{position:fixed;pointer-events:none;z-index:99;transform:translate(-50%,-130%) scale(1.15);box-shadow:0 8px 18px #0009}
+.cell{display:inline-flex;flex-direction:column;cursor:pointer}.cc{min-height:1.7em}
+.w{display:inline-block;white-space:nowrap}.ed{user-select:none;-webkit-user-select:none;line-height:1.2}
+.ed .lc{border-radius:3px}.ed .cell:hover .lc{background:var(--bd)}.lc.end{display:inline-block;min-width:1.5ch;border-bottom:2px dotted var(--bd)}
+.cell.hot .lc{background:var(--ac)!important;color:var(--bg)}
+.trash{flex:1;border:2px dashed var(--bd);border-radius:8px;padding:7px;text-align:center;color:var(--mu)}
+.trash.hot{border-color:#f55;color:#f55;background:#f551}
+body.drag{cursor:grabbing}
+.toast{position:fixed;left:50%;bottom:calc(70px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--card);border:1px solid var(--ac);border-radius:10px;padding:8px 12px;display:none;gap:10px;align-items:center;z-index:50;box-shadow:0 6px 20px #0007;white-space:nowrap}
+.sg{display:none}.stage header,.stage nav,.stage .bar,.stage .mu{display:none}.stage .sg{display:flex;position:fixed;right:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px));gap:6px;z-index:60;opacity:.9}
+.item .b{padding:4px 8px}
+.gd details{background:var(--card);border:1px solid var(--bd);border-radius:10px;margin:8px 0;padding:10px 12px}.gd summary{font-weight:700;cursor:pointer}.gd li{margin:5px 0}.gd code{background:var(--bd);padding:1px 5px;border-radius:4px}
+@media(max-width:520px){.row{grid-template-columns:1fr}.b{padding:6px 9px}header h1{font-size:16px}main{padding:8px}nav button{font-size:12px;padding:10px 2px}}
+</style><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script></head><body>
+<header id="hd"></header><main id="mn"></main>
+<div id="toast" class="toast"></div><div class="sg"><button class="b" onclick="toggleScroll()">⏯</button><button class="b" onclick="fs(-1)">A−</button><button class="b" onclick="fs(1)">A+</button><button class="b" onclick="stage(false)">✕</button></div>
+<nav id="nv"></nav>
+<script>
+const NS=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'],NF=['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
+const LAT={C:'Do',D:'Re',E:'Mi',F:'Fa',G:'Sol',A:'La',B:'Si'},LREV={Do:'C',Re:'D',Mi:'E',Fa:'F',Sol:'G',La:'A',Si:'B'};
+const THEMES=[['oscuro','Oscuro','#1c1c1e'],['claro','Claro','#f6f6f3'],['sepia','Sepia','#f1e6cf'],['noche','Noche','#0d1526'],['bosque','Bosque','#10201a'],['rosa','Rosa','#2a1220'],['contraste','Contraste','#000']];
+const DEMO=`# Verso
+[C]Cuando el sol se [G]va, la noche [Am]llega sin [F]avisar
+[C]Y tu voz me [G]dice que es hora de [F]volver [G]
+# Coro
+[F]Vuelve a mí, [C]vuelve a mí
+[G]Que sin ti no [Am]sé vivir [F/A]
+[F]Vuelve a mí, [C/E]vuelve a mí
+[Dm7]Tengo el alma [G7]en un [C]hilo`;
+let S={songs:[],sets:[],theme:'oscuro',notation:'ABC',fs:17,accent:''};
+try{const r=localStorage.getItem('cancionero');if(r)S={...S,...JSON.parse(r)}}catch(e){}
+if(!S.songs.length)S.songs=[{id:'d1',title:'Vuelve a mí (ejemplo)',artist:'Demo',key:'C',text:DEMO}];
+const DB={open:()=>new Promise((ok,no)=>{const r=indexedDB.open('cancionero',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>ok(r.result);r.onerror=()=>no()}),
+ async put(v){try{const d=await this.open();d.transaction('kv','readwrite').objectStore('kv').put(v,'S')}catch(e){}},
+ async get(){try{const d=await this.open();return await new Promise(ok=>{const q=d.transaction('kv').objectStore('kv').get('S');q.onsuccess=()=>ok(q.result);q.onerror=()=>ok(null)})}catch(e){return null}}};
+const save=()=>{S.ts=Date.now();S.dirty=(S.dirty||0)+1;const j=JSON.stringify(S);try{localStorage.setItem('cancionero',j)}catch(e){}DB.put(j)};
+function merge(d){(d.songs||[]).forEach(x=>{const i=S.songs.findIndex(y=>y.id==x.id);i<0?S.songs.push(x):S.songs[i]=x});(d.sets||[]).forEach(x=>{const i=S.sets.findIndex(y=>y.id==x.id);i<0?S.sets.push(x):S.sets[i]=x});save();draw()}
+async function loadRepo(quiet){try{const r=await fetch('songs.json',{cache:'no-store'});if(!r.ok)throw 0;merge(await r.json());if(!quiet)alert('Canciones cargadas desde songs.json')}catch(e){if(!quiet)alert('No encontré songs.json junto a esta página.')}}
+const bk=()=>S.dirty>=3?`<div class="item" style="border-color:var(--ac)" onclick="exp()">💾 ${S.dirty} cambios sin respaldo — toca para descargar una copia</div>`:'';
+let V={tab:'songs',song:null,edit:null,shift:0,q:'',set:null,extra:[],hist:[],mode:'vis',capo:0,fav:false},scrollT=null;
+const $=s=>document.querySelector(s),uid=()=>Math.random().toString(36).slice(2,9);
+const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function parseRoot(r){let m=r.match(/^(Sol|Do|Re|Mi|Fa|La|Si)([#b]?)/);if(m)return{n:LREV[m[1]],a:m[2],len:m[0].length};
+ m=r.match(/^([A-G])([#b]?)/);return m?{n:m[1],a:m[2],len:m[0].length}:null}
+function idx(n,a){let i=NS.indexOf(n);if(a=='#')i++;if(a=='b')i--;return(i+120)%12}
+function fmtNote(i,flat){const x=(flat?NF:NS)[((i%12)+12)%12];return S.notation=='LAT'?LAT[x[0]]+x.slice(1):x}
+function tChord(c,st,flat){if(c==='N.C.'||c==='NC')return c;const p=c.split('/');const r=parseRoot(p[0]);if(!r)return c;
+ let out=fmtNote(idx(r.n,r.a)+st,flat)+p[0].slice(r.len);
+ if(p[1]){const b=parseRoot(p[1]);out+='/'+(b?fmtNote(idx(b.n,b.a)+st,flat)+p[1].slice(b.len):p[1])}return out}
+const FLATKEYS=['F','Bb','Eb','Ab','Db','Gb','Dm','Gm','Cm','Fm','Bbm','Ebm'];
+function useFlat(key,st){const r=parseRoot(key||'C');if(!r)return false;const m=/m(?!aj)/.test(key.slice(r.len));
+ const k=fmtNoteRaw(idx(r.n,r.a)+st)+(m?'m':'');return FLATKEYS.includes(k)||(k.includes('b'))}
+function fmtNoteRaw(i){return NF[((i%12)+12)%12]}
+function tKey(key,st){const r=parseRoot(key||'C');if(!r)return key||'';const f=useFlat(key,st);return fmtNote(idx(r.n,r.a)+st,f)+key.slice(r.len)}
+function transposeText(t,st){const f=useFlat(S.curKey||'C',st);return t.replace(/\[([^\]]+)\]/g,(_,c)=>'['+tChord(c,st,f)+']')}
+function render(text,st,key){const f=useFlat(key,st);return text.split('\n').map(l=>{
+ if(/^#/.test(l))return`<div class="sec">${esc(l.replace(/^#\s*/,''))}</div>`;
+ const parts=l.split(/(\[[^\]]+\])/);let h='',ch=null,any=false;
+ for(const p of parts){const m=p.match(/^\[([^\]]+)\]$/);if(m){if(ch!==null)h+=seg(ch,'');ch=tChord(m[1],st,f);any=true}else{if(p||ch!==null){h+=seg(ch,p);ch=null}}}
+ if(ch!==null)h+=seg(ch,'');return`<div class="ln">${h||'&nbsp;'}</div>`}).join('')}
+const seg=(c,t)=>`<span class="seg"><span class="ch">${c==null?'&nbsp;':esc(c)}</span><span>${esc(t)||(c?'&nbsp;&nbsp;':'')}</span></span>`;
+
+function theme(){document.documentElement.dataset.theme=S.theme;const r=document.documentElement.style;
+ if(S.accent){r.setProperty('--ac',S.accent);r.setProperty('--ch',S.accent)}else{r.removeProperty('--ac');r.removeProperty('--ch')}
+ r.setProperty('--fs',S.fs+'px')}
+function go(o){Object.assign(V,o);stopScroll();document.body.classList.remove('stage');draw()}
+function draw(){theme();const hd=$('#hd'),mn=$('#mn');
+ $('#nv').innerHTML=[['songs','🎵 Canciones'],['sets','📋 Setlists'],['cfg','🎨 Ajustes'],['help','❓ Guía']].map(([k,l])=>`<button class="${V.tab==k&&!V.song&&!V.edit?'on':''}" onclick="go({tab:'${k}',song:null,edit:null,set:null})">${l}</button>`).join('');
+ if(V.edit)return editor(hd,mn);if(V.song)return viewer(hd,mn);
+ if(V.tab=='imp')return imp_(hd,mn);if(V.tab=='help')return help_(hd,mn);if(V.tab=='songs')return list(hd,mn);if(V.tab=='sets')return sets(hd,mn);cfg(hd,mn)}
+
+function list(hd,mn){hd.innerHTML=`<h1>Cancionero</h1><button class="b" onclick="go({tab:'imp'})">⬆ Importar</button><button class="b p" onclick="newSong()">+ Nueva</button>`;
+ mn.innerHTML=bk()+(S.seenGuide?'':`<div class="item" style="border-color:var(--ac)" onclick="go({tab:'help'})">👋 ¿Primera vez? Toca aquí para ver la guía de uso</div>`)+`<input placeholder="Buscar canción o artista…" value="${esc(V.q)}" oninput="V.q=this.value;res()"><div class="bar"><button class="b ${V.fav?'p':''}" onclick="V.fav=!V.fav;draw()">⭐ Favoritas</button><span class="mu">${S.songs.length} canciones</span></div><div id="res"></div>`;res()}
+function res(){const q=V.q.toLowerCase(),L=S.songs.filter(s=>(!V.fav||s.fav)&&(s.title+(s.artist||'')).toLowerCase().includes(q)).sort((a,b)=>a.title.localeCompare(b.title));
+ $('#res').innerHTML=L.map(s=>`<div class="item" onclick="open_('${s.id}')"><div class="t"><b>${esc(s.title)}</b><br><small>${esc(s.artist||'')}</small></div><span class="key">${esc(S.notation=='LAT'?tKey(s.key,0):s.key||'')}</span><button class="b" onclick="event.stopPropagation();fav('${s.id}')">${s.fav?'⭐':'☆'}</button><button class="b" onclick="event.stopPropagation();del('${s.id}')">🗑</button></div>`).join('')||'<p class="mu">No hay canciones.</p>'}
+function fav(id){const s=S.songs.find(x=>x.id==id);s.fav=!s.fav;save();$('#res')?res():draw()}
+function del(id,fromEd){const s=S.songs.find(x=>x.id==id);if(!s)return;S.bin=S.bin||[];S.bin.push({...s,del:Date.now()});S.songs=S.songs.filter(x=>x.id!=id);save();toast('Canción eliminada','Deshacer',()=>restore(id));if(fromEd)go({edit:null,song:null});else if($('#res'))res()}
+function restore(id){const i=(S.bin||[]).findIndex(x=>x.id==id);if(i<0)return;const s=S.bin.splice(i,1)[0];delete s.del;S.songs.push(s);save();draw()}
+function purge(id){S.bin=S.bin.filter(x=>x.id!=id);save();draw()}
+function toast(msg,lbl,fn){const t=$('#toast');t.innerHTML=`${msg} <button class="b p">${lbl}</button>`;t.style.display='flex';t.querySelector('button').onclick=()=>{fn();t.style.display='none'};clearTimeout(t._t);t._t=setTimeout(()=>t.style.display='none',7000)}
+function dl(n,c,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([c],{type}));a.download=n.replace(/[\\/:*?"<>|]/g,'');document.body.appendChild(a);a.click();a.remove()}
+function open_(id){V.shift=0;V.capo=0;go({song:id})}
+function newSong(){const s={id:uid(),title:'',artist:'',key:'C',text:'# Verso\n[C]Escribe la [G]letra con los [Am]acordes entre cor[F]chetes'};V.isNew=true;V.hist=[];go({edit:s})}
+
+const cur=()=>S.songs.find(x=>x.id==V.song);
+function viewer(hd,mn){const s=cur();if(!s)return go({song:null});
+ const inSet=V.set?S.sets.find(x=>x.id==V.set):null,ix=inSet?inSet.ids.indexOf(s.id):-1,eff=V.shift-V.capo;
+ hd.innerHTML=`<button class="b" onclick="go({song:null})">←</button><h1>${esc(s.title)}</h1>
+ ${inSet?`<button class="b" ${ix<1?'disabled':''} onclick="open_('${inSet.ids[ix-1]}')">‹</button><button class="b" ${ix>=inSet.ids.length-1?'disabled':''} onclick="open_('${inSet.ids[ix+1]}')">›</button>`:''}
+ <button class="b" onclick="fav('${s.id}')">${s.fav?'⭐':'☆'}</button><button class="b p" onclick="pdfOne()">📄 PDF</button><button class="b" onclick="editSong()">✎</button>`;
+ mn.innerHTML=`<div class="mu">${esc(s.artist||'')}</div>
+ <div class="bar"><span>Tono:</span><button class="b" onclick="sh(-1)">−½</button><span class="key">${esc(tKey(s.key,V.shift))}</span><button class="b" onclick="sh(1)">+½</button>
+ <select style="width:auto" onchange="goKey(+this.value)"><option>Ir a…</option>${NF.map((n,i)=>`<option value="${i}">${fmtNote(i,useFlat(n,0))}</option>`).join('')}</select>
+ ${V.shift?`<button class="b" onclick="applyShift()">Guardar tono</button><button class="b" onclick="sh(-V.shift)">Original</button>`:''}</div>
+ <div class="bar"><span>Capo:</span><select style="width:auto" onchange="V.capo=+this.value;draw()">${[0,1,2,3,4,5,6,7,8,9].map(i=>`<option ${i==V.capo?'selected':''}>${i}</option>`).join('')}</select>
+ <button class="b" onclick="V.capo=bestCapo();draw()">💡 Sugerir</button>${V.capo?`<span class="mu">tocas formas de ${esc(tKey(s.key,eff))}</span>`:''}</div>
+ <div class="bar"><button class="b" onclick="fs(-1)">A−</button><button class="b" onclick="fs(1)">A+</button>
+ <button class="b" onclick="S.notation=S.notation=='ABC'?'LAT':'ABC';save();draw()">${S.notation=='ABC'?'C D E → Do Re Mi':'Do Re Mi → C D E'}</button>
+ <button class="b" id="as" onclick="toggleScroll()">▶ Autoscroll</button><input id="sp" type="range" min="1" max="10" value="3" style="width:90px"></div>
+ <div class="bar"><button class="b" onclick="stage()">⛶ Modo escenario</button><button class="b" onclick="dupSong()">⧉ Duplicar</button><button class="b" onclick="chordPro()">⬇ ChordPro</button></div>
+ <div class="song">${render(s.text,eff,s.key)}</div><div style="height:40vh"></div>`}
+function goKey(i){const s=cur(),r=parseRoot(s.key||'C');V.shift=(i-idx(r.n,r.a)+12)%12;draw()}
+function bestCapo(){const s=cur(),EASY=['C','Am','G','Em','D','A','E','Dm'],cl=[...s.text.matchAll(/\[([^\]]+)\]/g)].map(x=>x[1]);let best=0,bs=-1;
+ for(let c=0;c<=7;c++){let sc=0;cl.forEach(x=>{const n=tChord(x,V.shift-c,false).replace(/^(Sol|Do|Re|Mi|Fa|La|Si)/,m=>LREV[m]).match(/^([A-G][#b]?)(m?)/);if(n&&EASY.includes(n[1]+n[2]))sc++});if(sc>bs){bs=sc;best=c}}return best}
+function dupSong(){const s=cur(),n={...s,id:uid(),title:s.title+' (copia)',fav:false};S.songs.push(n);save();toast('Canción duplicada','Abrir',()=>open_(n.id))}
+function chordPro(){const s=cur();S.curKey=s.key;const e=V.shift-V.capo,t=transposeText(s.text,e).split('\n').map(l=>/^#/.test(l)?'{comment: '+l.replace(/^#\s*/,'')+'}':l).join('\n');
+ dl((s.title||'cancion')+'.pro',`{title: ${s.title}}\n{artist: ${s.artist||''}}\n{key: ${tKey(s.key,e)}}\n\n${t}\n`,'text/plain')}
+function stage(on=true){document.body.classList.toggle('stage',on);try{if(on&&navigator.wakeLock)navigator.wakeLock.request('screen').then(w=>{window._wl=w}).catch(()=>{});else if(window._wl){window._wl.release();window._wl=null}}catch(e){}}
+function renSet(){const c=cs(),n=prompt('Nuevo nombre',c.name);if(n&&n.trim()){c.name=n.trim();save();draw()}}
+function imp_(hd,mn){hd.innerHTML=`<button class="b" onclick="go({tab:'songs'})">←</button><h1>Importar canciones</h1>`;
+ mn.innerHTML=`<p class="mu">Pega una canción con acordes —acordes encima de la letra (estilo Ultimate Guitar / Cifraclub) o ChordPro con [Am]— o sube archivos .txt / .pro / .cho. Detecto los acordes y las secciones solo, y luego puedes ajustar todo en el editor.</p>
+ <div class="row"><div><label>Título</label><input id="it"></div><div><label>Artista</label><input id="ia"></div></div>
+ <label>Pegar texto</label><textarea id="ix" placeholder="[Verso]\n   Am        F\nLetra de la canción aquí…"></textarea>
+ <div class="bar"><button class="b p" onclick="doPaste()">Convertir y revisar</button><label class="b" style="margin:0;color:var(--tx)">📁 Subir archivos<input type="file" multiple accept=".txt,.pro,.cho,.chordpro,.crd,.md,text/plain" hidden onchange="doFiles(this.files)"></label></div>`}
+function doPaste(){const raw=$('#ix').value;if(!raw.trim())return alert('Pega primero la canción.');const s=parseImport(raw);s.title=$('#it').value.trim()||s.title;s.artist=$('#ia').value.trim()||s.artist;V.isNew=true;V.hist=[];V.mode='vis';go({tab:'songs',edit:s})}
+async function doFiles(fl){if(!fl.length)return;if(fl.length==1){const s=parseImport(await fl[0].text(),fl[0].name);V.isNew=true;V.hist=[];V.mode='vis';return go({tab:'songs',edit:s})}
+ for(const f of fl)S.songs.push(parseImport(await f.text(),f.name));save();go({tab:'songs'});toast(fl.length+' canciones importadas','OK',()=>{})}
+const CH=/^(?:Sol|Do|Re|Mi|Fa|La|Si|[A-G])[#b]?(?:m|M|maj|min|dim|aug|sus|add|[+\-º°\d()#b])*(?:\/(?:Sol|Do|Re|Mi|Fa|La|Si|[A-G])[#b]?)?$/;
+const SEC=/^\s*[\[(]?\s*(intro|verso|verse|coro|chorus|estribillo|puente|bridge|pre-?coro|pre-?chorus|outro|solo|interludio|final|instrumental|refr[aá]n)\b[^\])]*[\])]?:?\s*$/i;
+const isCh=l=>{const t=l.trim().split(/\s+/);return t[0]!==''&&t.some(x=>CH.test(x))&&t.every(x=>CH.test(x)||/^[|:\-–.()x×\d%/]+$/i.test(x))};
+function parseImport(raw,fn){let title='',artist='',key='',m;const out=[],L=raw.replace(/\r/g,'').replace(/\t/g,'    ').split('\n');
+ for(let i=0;i<L.length;i++){const l=L[i];
+  if((m=l.match(/^\{\s*(title|t|artist|a|subtitle|st|key)\s*:\s*(.*?)\s*\}$/i))){const k=m[1].toLowerCase();if(k=='title'||k=='t')title=m[2];else if(k=='key')key=m[2];else artist=m[2];continue}
+  if((m=l.match(/^\{\s*(?:comment|c|ci)\s*:\s*(.*?)\s*\}$/i))){out.push('# '+m[1]);continue}
+  if(/^\{\s*(start_of|so)/i.test(l)){const n=l.match(/:\s*(.*?)\s*\}/);out.push('# '+((n&&n[1])||(/chorus|soc/i.test(l)?'Coro':'Sección')));continue}
+  if(/^\{.*\}$/.test(l))continue;
+  if(SEC.test(l)&&!isCh(l)){out.push('# '+l.replace(/[\[\]()]/g,'').replace(/:\s*$/,'').trim());continue}
+  if(isCh(l)){const nx=L[i+1];
+   if(nx!==undefined&&nx.trim()&&!isCh(nx)&&!SEC.test(nx)&&!/^\{/.test(nx)&&!/\[[^\]]+\]/.test(nx)){let ly=nx;const ms=[...l.matchAll(/\S+/g)].filter(x=>CH.test(x[0]));
+    const need=Math.max(...ms.map(x=>x.index))+1;if(ly.length<need)ly=ly.padEnd(need);
+    for(let k=ms.length-1;k>=0;k--)ly=ly.slice(0,ms[k].index)+'['+ms[k][0]+']'+ly.slice(ms[k].index);
+    out.push(ly.replace(/\s+$/,''));i++}
+   else out.push(l.trim().split(/\s+/).filter(x=>CH.test(x)).map(x=>'['+x+']').join(' '));
+   continue}
+  out.push(l.replace(/\s+$/,''))}
+ const text=out.join('\n').replace(/\n{3,}/g,'\n\n').trim();
+ if(!key){const f=text.match(/\[([^\]]+)\]/);if(f)key=f[1].split('/')[0]}
+ if(!title&&fn)title=fn.replace(/\.[^.]+$/,'');
+ return{id:uid(),title,artist,key:key||'C',text}}
+function help_(hd,mn){hd.innerHTML='<h1>❓ Guía de uso</h1>';S.seenGuide=1;
+ const D=(t,b,o)=>`<details ${o?'open':''}><summary>${t}</summary>${b}</details>`;
+ mn.innerHTML=`<div class="gd"><p class="mu">Toca cada sección para abrirla.</p>`+
+ D('1. Crear tu primera canción',`<ol><li>En <b>🎵 Canciones</b> toca <b>+ Nueva</b>.</li><li>Escribe el título, el artista y el <b>tono original</b> (por ejemplo <code>C</code>, <code>Am</code> o <code>Sol</code>).</li><li>Abre <b>✍️ Escribir letra</b>, pega o escribe la letra. Las líneas que empiezan con <code>#</code> son secciones (<code># Verso</code>, <code># Coro</code>).</li><li>Pasa a <b>🎯 Arrastrar acordes</b> para ponerlos (siguiente punto).</li><li>Toca <b>Guardar</b>.</li></ol>`,1)+
+ D('2. Poner acordes arrastrando',`<ul><li><b>Arrastra</b> un acorde de la paleta de arriba y suéltalo sobre la letra, justo donde suena.</li><li>En el celular también puedes <b>tocar el acorde</b> (se resalta) y luego <b>tocar la sílaba</b>.</li><li><b>Mover:</b> arrastra un acorde ya puesto a otra sílaba.</li><li><b>Borrar:</b> suéltalo en la papelera 🗑 o tócalo y deja el nombre vacío.</li><li><b>Renombrar:</b> toca un acorde puesto y escribe el nuevo nombre.</li><li><b>＋ Otro</b> crea acordes que no están en la paleta (Em7, Bsus4, Do/Mi…).</li><li><b>↶ Deshacer</b> revierte los últimos cambios.</li><li>La paleta se adapta al tono que escribiste arriba.</li></ul>`)+
+ D('3. Importar una canción que ya tiene acordes',`<ul><li>En Canciones toca <b>⬆ Importar</b>.</li><li>Pega el texto con los acordes <b>encima de la letra</b> (como en Ultimate Guitar o Cifraclub) o en formato <b>ChordPro</b> (<code>[Am]letra</code>), o sube archivos <b>.txt, .pro, .cho</b> (puedes subir varios a la vez).</li><li>La app detecta acordes, posiciones y secciones. Con un solo archivo o texto se abre en el editor para que lo revises; con varios archivos se agregan directo.</li><li>Revisa siempre el título y el tono: son lo que más suele faltar.</li></ul>`)+
+ D('4. Cambiar de tono y usar capo',`<ul><li>Dentro de una canción usa <b>−½ / +½</b> para subir o bajar medio tono, o <b>Ir a…</b> para saltar a un tono exacto. Todos los acordes cambian solos.</li><li><b>Guardar tono</b> deja la canción permanentemente en el tono nuevo; <b>Original</b> vuelve atrás.</li><li><b>Capo:</b> elige el traste y verás las formas que debes tocar. <b>💡 Sugerir</b> propone el capo con más acordes fáciles.</li><li><b>C D E ↔ Do Re Mi</b> cambia la notación.</li></ul>`)+
+ D('5. Setlists (repertorios)',`<ul><li>En <b>📋 Setlists</b> toca <b>+ Nuevo</b> y ponle nombre.</li><li>Agrega canciones con el selector, reordénalas con ↑ ↓ y quítalas con ✕.</li><li>Al abrir una canción desde el setlist aparecen flechas <b>‹ ›</b> para pasar a la anterior o siguiente.</li><li>✎ renombra el setlist y <b>📄 PDF</b> lo exporta completo.</li></ul>`)+
+ D('6. Tocar en vivo: modo escenario',`<ul><li><b>⛶ Modo escenario</b> oculta los menús y mantiene la pantalla encendida. Abajo a la derecha quedan ⏯ (autoscroll), A− / A+ y ✕ para salir.</li><li><b>▶ Autoscroll</b> desplaza la letra sola; la barra deslizante ajusta la velocidad.</li><li><b>A− / A+</b> cambian el tamaño de la letra.</li></ul>`)+
+ D('7. PDF y exportar',`<ul><li><b>📄 PDF</b> (arriba en cada canción) descarga la canción en el tono y capo que tengas elegidos.</li><li>En un setlist exporta todas sus canciones; en <b>Ajustes</b> puedes exportar todo el cancionero.</li><li><b>⬇ ChordPro</b> descarga la canción en formato estándar para otras apps.</li></ul>`)+
+ D('8. Eliminar y recuperar',`<ul><li>El botón 🗑 de la lista elimina una canción y aparece un aviso <b>Deshacer</b> durante unos segundos.</li><li>Después sigue en la <b>papelera</b> (Ajustes), donde puedes <b>Restaurar</b> o borrar para siempre.</li><li>⭐ marca favoritas; el botón <b>⭐ Favoritas</b> de la lista filtra solo esas. <b>⧉ Duplicar</b> crea una copia para hacer variantes.</li></ul>`)+
+ D('9. Que no se pierdan tus datos',`<ul><li>Todo se guarda solo en este navegador, en dos lugares a la vez.</li><li><b>Es por dispositivo:</b> el celular y la computadora no se sincronizan solos.</li><li>Cuando aparezca el aviso <b>💾 cambios sin respaldo</b>, tócalo: descarga un archivo <code>.json</code>. Guárdalo en la nube o en tu correo.</li><li>Para restaurar o pasar canciones a otro dispositivo: <b>Ajustes → Importar</b> (se fusiona sin borrar lo que ya tienes).</li><li>Si subes ese archivo a tu repositorio con el nombre <code>songs.json</code>, la app lo carga sola en un navegador nuevo.</li><li>Borrar los datos del navegador borra el cancionero: por eso conviene el respaldo.</li></ul>`)+
+ D('10. Publicar en GitHub Pages',`<ol><li>Crea un repositorio y sube <code>index.html</code> a la raíz.</li><li>En <b>Settings → Pages</b> elige la rama principal y guarda.</li><li>Tu app queda en <code>https://tu-usuario.github.io/tu-repo/</code>. En el celular, usa "Agregar a pantalla de inicio" para abrirla como app.</li></ol>`)+
+ D('11. Temas y ajustes',`<ul><li>En <b>🎨 Ajustes</b> eliges el tema (Oscuro, Claro, Sepia, Noche, Bosque, Rosa, Contraste), un color de acento propio, la notación y el tamaño de letra.</li></ul>`)+`</div>`}
+function sh(n){V.shift=(V.shift+n+12)%12;const y=$('#mn').scrollTop;draw();$('#mn').scrollTop=y}
+function fs(n){S.fs=Math.max(11,Math.min(40,S.fs+n*2));save();const y=$('#mn').scrollTop;draw();$('#mn').scrollTop=y}
+function applyShift(){const s=S.songs.find(x=>x.id==V.song);S.curKey=s.key;s.text=transposeText(s.text,V.shift);s.key=tKey(s.key,V.shift);
+ if(S.notation=='LAT'){const r=parseRoot(s.key);s.key=NS[idx(r.n,r.a)]}V.shift=0;save();draw()}
+function toggleScroll(){if(scrollT)return stopScroll();$('#as').textContent='⏸ Detener';
+ scrollT=setInterval(()=>{$('#mn').scrollTop+=+$('#sp').value*0.5},30)}
+function stopScroll(){clearInterval(scrollT);scrollT=null}
+
+function editSong(){const s=S.songs.find(x=>x.id==V.song);V.isNew=false;V.hist=[];go({edit:{...s}})}
+function editor(hd,mn){const s=V.edit;V.mode=V.mode||'vis';
+ hd.innerHTML=`<button class="b" onclick="V.isNew=false;go({edit:null})">←</button><h1>${V.isNew?'Nueva canción':'Editar'}</h1><button class="b p" onclick="saveSong()">Guardar</button>`;
+ mn.innerHTML=`<label>Título</label><input value="${esc(s.title)}" oninput="V.edit.title=this.value">
+ <div class="row"><div><label>Artista</label><input value="${esc(s.artist||'')}" oninput="V.edit.artist=this.value"></div>
+ <div><label>Tono original</label><input value="${esc(s.key||'C')}" oninput="V.edit.key=this.value;pal()" placeholder="C, Am, Sol…"></div></div>
+ <div class="bar" style="margin-top:12px"><button class="b ${V.mode=='vis'?'p':''}" onclick="V.mode='vis';draw()">🎯 Arrastrar acordes</button><button class="b ${V.mode=='txt'?'p':''}" onclick="V.mode='txt';draw()">✍️ Escribir letra</button></div>`+
+ (V.mode=='txt'?`<p class="mu">Escribe o pega la letra y luego pasa a «Arrastrar acordes». Las líneas con # son secciones (Verso, Coro…). También puedes escribir acordes a mano como [Am].</p><textarea oninput="V.edit.text=this.value">${esc(s.text)}</textarea>`:
+ `<p class="mu">👆 Arrastra un acorde sobre la sílaba donde suena, o toca el acorde y luego la sílaba. Para moverlo, arrástralo; para borrarlo, suéltalo en la papelera; toca uno colocado para renombrarlo.</p>
+ <div id="pal" class="bar"></div><div class="bar"><button class="b" onclick="undo()">↶ Deshacer</button><div id="trash" class="trash">🗑 Suelta aquí para borrar</div></div>
+ <div class="song ed" id="cv"></div><div style="height:30vh"></div>`)+
+ (V.isNew?'':`<button class="b d" style="margin-top:14px" onclick="delSong()">Eliminar canción</button>`);
+ if(V.mode=='vis'){pal();cv()}}
+function pl(l){const c={};let t='';l.replace(/\[([^\]]+)\]|([^\[]+)/g,(_,a,b)=>{if(a)c[t.length]=a;else t+=b});return{t,c}}
+function ser(t,c){let o='';for(let i=0;i<=t.length;i++){if(c[i])o+='['+c[i]+']';if(i<t.length)o+=t[i]}return o}
+function pal(){const el=$('#pal');if(!el)return;const k=V.edit.key||'C',r=parseRoot(k)||{n:'C',a:'',len:1},minor=/m(?!aj)/.test(k.slice(r.len)),root=idx(r.n,r.a),f=useFlat(k,0);
+ const sc=minor?[[0,'m'],[2,'dim'],[3,''],[5,'m'],[7,'m'],[8,''],[10,'']]:[[0,''],[2,'m'],[4,'m'],[5,''],[7,''],[9,'m'],[11,'dim']];
+ const L=sc.map(([i,q])=>fmtNote(root+i,f)+q);L.push(fmtNote(root+7,f)+'7');
+ [...(V.edit.text.match(/\[[^\]]+\]/g)||[]).map(x=>x.slice(1,-1)),...V.extra].forEach(x=>{if(!L.includes(x))L.push(x)});
+ el.innerHTML=L.map(n=>`<b class="chip pa ${V.sel==n?'sel':''}" data-n="${esc(n)}">${esc(n)}</b>`).join('')+`<button class="b" onclick="custom()">＋ Otro</button>`}
+function custom(){const n=prompt('Nombre del acorde (ej: Em7, Bsus4, Do/Mi)');if(n&&n.trim()){V.extra.push(n.trim());V.sel=n.trim();pal()}}
+function cv(){const el=$('#cv');if(!el)return;el.innerHTML=V.edit.text.split('\n').map((l,i)=>{
+ if(/^#/.test(l))return`<div class="sec">${esc(l.replace(/^#\s*/,''))}</div>`;
+ const{t,c}=pl(l);let ws=[],cur='';
+ for(let j=0;j<=t.length;j++){const x=t[j],ch=x===undefined?'':x;
+  cur+=`<span class="cell" data-l="${i}" data-p="${j}"><span class="cc">${c[j]?`<b class="chip pl" data-n="${esc(c[j])}" data-l="${i}" data-p="${j}">${esc(c[j])}</b>`:''}</span><span class="lc ${x===undefined?'end':''}">${ch===' '?'&nbsp;':esc(ch)||'&nbsp;'}</span></span>`;
+  if(ch===' '){ws.push(cur);cur=''}}
+ if(cur)ws.push(cur);return`<div class="ln">${ws.map(w=>`<span class="w">${w}</span>`).join('')}</div>`}).join('')}
+function setChord(l,p,n){const a=V.edit.text.split('\n'),{t,c}=pl(a[l]);if(n)c[p]=n;else delete c[p];a[l]=ser(t,c);V.edit.text=a.join('\n')}
+function snap(){V.hist.push(V.edit.text);if(V.hist.length>60)V.hist.shift()}
+function undo(){if(V.hist.length){V.edit.text=V.hist.pop();pal();cv()}}
+let D=null,gh=null;
+const hot=(e)=>{document.querySelectorAll('.hot').forEach(x=>x.classList.remove('hot'));const el=document.elementFromPoint(e.clientX,e.clientY);const t=el&&(el.closest('.cell')||el.closest('#trash'));if(t)t.classList.add('hot');return t};
+document.addEventListener('pointerdown',e=>{const c=e.target.closest&&e.target.closest('.chip');if(!c||!V.edit||V.mode!='vis')return;e.preventDefault();
+ D={n:c.dataset.n,from:c.classList.contains('pl')?{l:+c.dataset.l,p:+c.dataset.p}:null,x:e.clientX,y:e.clientY,moved:false}});
+document.addEventListener('pointermove',e=>{if(!D)return;
+ if(!D.moved&&Math.hypot(e.clientX-D.x,e.clientY-D.y)>6){D.moved=true;gh=document.createElement('b');gh.className='chip ghost';gh.textContent=D.n;document.body.appendChild(gh);document.body.classList.add('drag')}
+ if(D.moved){const m=$('#mn');if(e.clientY<110)m.scrollTop-=14;else if(e.clientY>innerHeight-110)m.scrollTop+=14;gh.style.left=e.clientX+'px';gh.style.top=e.clientY+'px';hot(e)}});
+document.addEventListener('pointerup',e=>{if(!D)return;const d=D;D=null;
+ if(!d.moved){if(d.from){const n=prompt('Renombrar acorde (vacío = borrar)',d.n);if(n!==null){snap();setChord(d.from.l,d.from.p,n.trim()||null);pal();cv()}}else{V.sel=V.sel==d.n?null:d.n;pal()}return}
+ const t=hot(e);gh.remove();gh=null;document.body.classList.remove('drag');document.querySelectorAll('.hot').forEach(x=>x.classList.remove('hot'));V.noClick=true;setTimeout(()=>V.noClick=false,80);
+ const cell=t&&t.closest('.cell'),trash=t&&t.id=='trash';
+ if(cell){snap();if(d.from)setChord(d.from.l,d.from.p,null);setChord(+cell.dataset.l,+cell.dataset.p,d.n);V.sel=null;pal();cv();if(navigator.vibrate)navigator.vibrate(15)}
+ else if(d.from&&(trash||!t)){snap();setChord(d.from.l,d.from.p,null);pal();cv()}});
+document.addEventListener('click',e=>{const c=e.target.closest&&e.target.closest('.cell');if(!c||!V.sel||V.noClick||!V.edit||V.mode!='vis')return;snap();setChord(+c.dataset.l,+c.dataset.p,V.sel);pal();cv()});
+function saveSong(){const s=V.edit;s.title=(s.title||'').trim()||'Sin título';s.key=(s.key||'').trim()||'C';
+ const i=S.songs.findIndex(x=>x.id==s.id);i<0?S.songs.push(s):S.songs[i]=s;save();V.isNew=false;V.shift=0;go({edit:null,song:s.id})}
+
+function pdfBuild(items){const{jsPDF}=window.jspdf,doc=new jsPDF({unit:'mm',format:'a4'}),W=84;
+ items.forEach(({s,shift,capo},n)=>{if(n)doc.addPage();let y=20;const f=useFlat(s.key,shift);
+  doc.setFont('helvetica','bold').setFontSize(20).setTextColor(0);doc.text(s.title,15,y);y+=7;
+  doc.setFont('helvetica','normal').setFontSize(11).setTextColor(110);doc.text((s.artist?s.artist+'  ·  ':'')+'Tono: '+tKey(s.key,shift+(capo||0))+(capo?'  ·  Capo '+capo:''),15,y);y+=10;
+  const need=h=>{if(y+h>285){doc.addPage();y=20}};
+  s.text.split('\n').forEach(l=>{
+   if(/^#/.test(l)){need(14);y+=3;doc.setFont('courier','bold').setFontSize(10).setTextColor(60);doc.text(l.replace(/^#\s*/,'').toUpperCase(),15,y);y+=5;return}
+   const{t,c}=pl(l);let cs='';Object.keys(c).map(Number).sort((a,b)=>a-b).forEach(p=>{cs=cs.padEnd(cs?Math.max(p,cs.length+1):p)+tChord(c[p],shift,f)});
+   const M=Math.max(t.length,cs.length);let st=0;
+   do{let en=Math.min(st+W,M);if(en<M){const sp=t.lastIndexOf(' ',en);if(sp>st)en=sp+1}
+    const a=cs.slice(st,en).trimEnd(),b=t.slice(st,en).trimEnd();need(11);
+    if(a){doc.setFont('courier','bold').setFontSize(10).setTextColor(194,65,12);doc.text(a,15,y)}y+=4.4;
+    doc.setFont('courier','normal').setTextColor(0);doc.text(b,15,y);y+=5.2;st=en}while(st<M)});
+ });return doc}
+function toPDF(items,name){if(!window.jspdf)return alert('La librería PDF aún carga, intenta otra vez en un momento.');
+ const fn=(name||'cancionero').replace(/[^\w\- áéíóúñÁÉÍÓÚÑ]/g,'')+'.pdf';pdfBuild(items).save(fn)}
+function pdfOne(){const s=S.songs.find(x=>x.id==V.song);toPDF([{s,shift:V.shift-V.capo,capo:V.capo}],s.title)}
+function pdfSet(){const c=cs();toPDF(c.ids.map(id=>({s:S.songs.find(x=>x.id==id),shift:0})).filter(x=>x.s),c.name)}
+function delSong(){del(V.edit.id,true)}
+
+function sets(hd,mn){const cur=V.set?S.sets.find(x=>x.id==V.set):null;
+ if(!cur){hd.innerHTML=`<h1>Setlists</h1><button class="b p" onclick="newSet()">+ Nuevo</button>`;
+  mn.innerHTML=S.sets.map(x=>`<div class="item" onclick="go({set:'${x.id}'})"><div class="t"><b>${esc(x.name)}</b><br><small>${x.ids.length} canciones</small></div></div>`).join('')||'<p class="mu">Crea un setlist para ordenar tu repertorio.</p>';return}
+ hd.innerHTML=`<button class="b" onclick="go({set:null})">←</button><h1>${esc(cur.name)}</h1><button class="b" onclick="renSet()">✎</button><button class="b p" onclick="pdfSet()">📄 PDF</button><button class="b d" onclick="delSet()">🗑</button>`;
+ mn.innerHTML=cur.ids.map((id,i)=>{const s=S.songs.find(x=>x.id==id);return s?`<div class="item"><div class="t" onclick="V.shift=0;V.capo=0;go({song:'${id}'})"><b>${i+1}. ${esc(s.title)}</b><br><small>${esc(s.artist||'')}</small></div>
+  <button class="b" onclick="mv(${i},-1)">↑</button><button class="b" onclick="mv(${i},1)">↓</button><button class="b d" onclick="rm(${i})">✕</button></div>`:''}).join('')+
+  `<label>Agregar canción</label><select onchange="addTo(this.value)"><option value="">Elegir…</option>${S.songs.filter(s=>!cur.ids.includes(s.id)).map(s=>`<option value="${s.id}">${esc(s.title)}</option>`).join('')}</select>`}
+function newSet(){const n=prompt('Nombre del setlist');if(!n)return;const x={id:uid(),name:n,ids:[]};S.sets.push(x);save();go({set:x.id})}
+function cs(){return S.sets.find(x=>x.id==V.set)}
+function addTo(id){if(id){cs().ids.push(id);save();draw()}}
+function rm(i){cs().ids.splice(i,1);save();draw()}
+function mv(i,d){const a=cs().ids,j=i+d;if(j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];save();draw()}
+function delSet(){if(confirm('¿Eliminar setlist?')){S.sets=S.sets.filter(x=>x.id!=V.set);save();go({set:null})}}
+
+function cfg(hd,mn){hd.innerHTML='<h1>Ajustes</h1>';
+ mn.innerHTML=`<label>Tema de color</label><div class="sw">${THEMES.map(([k,n,c])=>`<button class="${S.theme==k?'on':''}" style="background:${c};color:${k=='claro'||k=='sepia'?'#222':'#fff'}" onclick="S.theme='${k}';save();draw()">${n}</button>`).join('')}</div>
+ <label>Color de acento personalizado</label><div class="bar"><input type="color" style="width:70px;padding:2px" value="${S.accent||'#ffb020'}" onchange="S.accent=this.value;save();draw()"><button class="b" onclick="S.accent='';save();draw()">Restablecer</button></div>
+ <label>Notación de acordes</label><select onchange="S.notation=this.value;save();draw()"><option value="ABC" ${S.notation=='ABC'?'selected':''}>Americana (C D E F G A B)</option><option value="LAT" ${S.notation=='LAT'?'selected':''}>Latina (Do Re Mi Fa Sol La Si)</option></select>
+ <label>Tamaño de letra: ${S.fs}px</label><input type="range" min="12" max="36" value="${S.fs}" oninput="S.fs=+this.value;save();theme()">
+ <label>Papelera (${(S.bin||[]).length})</label>${(S.bin||[]).map(x=>`<div class="item"><div class="t">${esc(x.title)}</div><button class="b" onclick="restore('${x.id}')">Restaurar</button><button class="b d" onclick="purge('${x.id}')">✕</button></div>`).join('')||'<p class="mu">Vacía. Lo que elimines puede recuperarse aquí.</p>'}
+ <label>Respaldo</label><div class="bar"><button class="b" onclick="toPDF(S.songs.map(s=>({s,shift:0})),'Cancionero completo')">📄 PDF de todo el cancionero</button></div><div class="bar"><button class="b" onclick="exp()">⬇ Exportar JSON</button><label class="b" style="margin:0;color:var(--tx)">⬆ Importar<input type="file" accept=".json" hidden onchange="imp(this.files[0])"></label></div>
+ <div class="bar"><button class="b" onclick="loadRepo()">🔄 Cargar songs.json del repositorio</button></div>
+ <p class="mu">Tus canciones se guardan automáticamente en este navegador (en dos lugares a la vez, y se pide almacenamiento persistente). Para no perderlas nunca: exporta un respaldo de vez en cuando y, si quieres, sube ese archivo a tu repositorio con el nombre <b>songs.json</b>; la app lo carga sola en un dispositivo nuevo.${S.lastBackup?'<br>Último respaldo: '+new Date(S.lastBackup).toLocaleString():''}</p>`}
+function exp(){S.dirty=0;S.lastBackup=Date.now();save();const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(S,null,1)],{type:'application/json'}));a.download='cancionero-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();draw()}
+function imp(f){if(!f)return;const r=new FileReader();r.onload=()=>{try{merge(JSON.parse(r.result));alert('Respaldo importado')}catch(e){alert('Archivo inválido')}};r.readAsText(f)}
+draw();
+if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();
+DB.get().then(j=>{if(j){const d=JSON.parse(j);if((d.ts||0)>(S.ts||0)){S={...S,...d};draw()}}else if(!S.ts)loadRepo(true)});
+</script></body></html>
